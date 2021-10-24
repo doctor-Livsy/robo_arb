@@ -1,14 +1,14 @@
 [tool.poetry]
-name = "robo_arb"
+name = "robo"
 version = "0.1.0"
 description = ""
 authors = ["dr.Livsy <plumbus.rise@gmail.com>"]
 
 [tool.poetry.dependencies]
-python = "^3.10"
-python-binance = "^1.0.15"
+python = "^3.8"
 asyncio = "^3.4.3"
-config = "^0.5.1"
+python-binance = "^1.0.15"
+ftx = "^1.0.2"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
