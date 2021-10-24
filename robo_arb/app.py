@@ -12,10 +12,8 @@ def load_settings():
 async def main(settings: configparser.ConfigParser):
     ticker = settings['ticker_parameters']['ticker']
     binance_socket = await start_binance_socket(ticker)
-
-
+    print(0)
 
 if __name__ == '__main__':
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    loop.run_until_complete(main(settings=load_settings()))
+    base_loop = asyncio.get_running_loop()
+    base_loop.run_until_complete(main(settings=load_settings()))
