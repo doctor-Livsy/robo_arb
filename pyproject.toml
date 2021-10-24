@@ -8,6 +8,7 @@ authors = ["dr.Livsy <plumbus.rise@gmail.com>"]
 python = "^3.10"
 python-binance = "^1.0.15"
 asyncio = "^3.4.3"
+config = "^0.5.1"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
