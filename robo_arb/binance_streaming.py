@@ -3,17 +3,20 @@ import websockets
 import json
 
 async def start_binance_socket(ticker: str):
-    # TODO: Надо перейти на версию python 3.8.8
-    url = 'wss://stream.binance.com:9443/ws/<streamName>'
+
+    url = f'wss://stream.binance.com:9443/ws/{ticker}@bookTicker'
     subscribe_request = {"method": "SUBSCRIBE",
-                         "params": [ticker + "@aggTrade"],
+                         "params": [ticker.lower() + "@bookTicker"],
                          "id": 1}
 
-    async with websockets.connect(url) as websocket:
-        await websocket.send(subscribe_request)
-        greeting = await websocket.recv()
-        print(greeting)
+    ws = await websockets.connect(url)
+    await ws.send(json.dumps(subscribe_request))
+    message = await ws.recv()
+    print(message)
 
+
+async def binance_ws(ticker: str):
+    print(0)
 
 
 # if __name__ == '__main__':

@@ -15,5 +15,5 @@ async def main(settings: configparser.ConfigParser):
     print(0)
 
 if __name__ == '__main__':
-    base_loop = asyncio.get_running_loop()
-    base_loop.run_until_complete(main(settings=load_settings()))
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(main(settings=load_settings()))
