@@ -1,35 +1,38 @@
 import asyncio
 import configparser
-from exchanges_streaming import start_socket
+from exchanges_streaming import start_sockets
 
 
-def load_settings():
+def load_settings() -> configparser.ConfigParser:
     config = configparser.ConfigParser()
     config.read('settings.ini')
     return config
 
 
-async def binance_init(ticker):
-    url = f'wss://stream.binance.com:9443/ws/{ticker}@bookTicker'
-    subscribe_request = {"method": "SUBSCRIBE",
-                         "params": [ticker.lower() + "@bookTicker"],
-                         "id": 1}
-    await start_socket(url=url, request=subscribe_request)
+async def exchanges_websocket_data(bnc_ticker: str, ftx_ticker: str) -> dict:
+    binance_data = {'url': f'wss://stream.binance.com:9443/ws/{bnc_ticker}@bookTicker',
+                    'subscribe_request': {"method": "SUBSCRIBE",
+                                          "params": [bnc_ticker.lower() + "@bookTicker"],
+                                          "id": 1}}
+    ftx_data = {'url': f'wss://ftx.com/ws/',
+                'subscribe_request': {'op': 'subscribe',
+                                      'channel': 'ticker',
+                                      'market': ftx_ticker}}
+    websocket_data = {'binance': binance_data,
+                      'ftx': ftx_data}
+    return websocket_data
 
 
-async def ftx_init(ticker):
-    url = f'wss://ftx.com/ws/'
-    subscribe_request = {'op': 'subscribe',
-                         'channel': 'orderbook',
-                         'market': 'BTC-PERP'}
-    await start_socket(url=url, request=subscribe_request)
+async def main(settings: configparser.ConfigParser) -> None:
 
+    bnc_ticker = settings['ticker_parameters']['bnc_ticker']
+    ftx_ticker = settings['ticker_parameters']['ftx_ticker']
+    refresh_rate = float(settings['system_parameters']['refresh_rate'])
+    price_diff = float(settings['system_parameters']['price_difference'])
 
-async def main(settings: configparser.ConfigParser):
-    ticker = settings['ticker_parameters']['ticker']
-    # await binance_init(ticker)
-    await ftx_init(ticker)
-    print(0)
+    websocket_data = await exchanges_websocket_data(bnc_ticker, ftx_ticker)
+
+    await start_sockets(websocket_data, refresh_rate, price_diff)
 
 
 if __name__ == '__main__':
