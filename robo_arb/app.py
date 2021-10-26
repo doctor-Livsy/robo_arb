@@ -1,6 +1,6 @@
 import asyncio
 import configparser
-from exchanges_streaming import start_sockets
+from exchanges_streaming import start_sockets, exchanges_message_handler
 
 
 def load_settings() -> configparser.ConfigParser:
@@ -24,15 +24,18 @@ async def exchanges_websocket_data(bnc_ticker: str, ftx_ticker: str) -> dict:
 
 
 async def main(settings: configparser.ConfigParser) -> None:
-
+    # loading of settings
     bnc_ticker = settings['ticker_parameters']['bnc_ticker']
     ftx_ticker = settings['ticker_parameters']['ftx_ticker']
     refresh_rate = float(settings['system_parameters']['refresh_rate'])
     price_diff = float(settings['system_parameters']['price_difference'])
 
+    # opening websockets and subscribing to update
     websocket_data = await exchanges_websocket_data(bnc_ticker, ftx_ticker)
+    bnc, ftx = await start_sockets(websocket_data)
 
-    await start_sockets(websocket_data, refresh_rate, price_diff)
+    # processing updates
+    await exchanges_message_handler(bnc, ftx, refresh_rate, price_diff)
 
 
 if __name__ == '__main__':

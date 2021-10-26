@@ -2,7 +2,7 @@ import asyncio
 import websockets
 import json
 from websockets import ConnectionClosed
-from exchanges_buffer import price_analyze
+from strategy import price_analyze
 
 
 async def exchanges_message_handler(bnc_websocket, ftx_websocket, refresh_rate, diff) -> None:
@@ -21,7 +21,7 @@ async def exchanges_message_handler(bnc_websocket, ftx_websocket, refresh_rate, 
             ok = False
 
 
-async def start_sockets(data: dict, refresh_rate, diff) -> None:
+async def start_sockets(data: dict) -> tuple:
 
     bnc_websocket = await websockets.connect(data['binance']['url'], max_queue=None, ping_interval=None)
     ftx_websocket = await websockets.connect(data['ftx']['url'], max_queue=None, ping_interval=None)
@@ -29,8 +29,4 @@ async def start_sockets(data: dict, refresh_rate, diff) -> None:
     await bnc_websocket.send(json.dumps(data['binance']['subscribe_request']))
     await ftx_websocket.send(json.dumps(data['ftx']['subscribe_request']))
 
-    await exchanges_message_handler(bnc_websocket, ftx_websocket, refresh_rate, diff)
-
-
-
-
+    return bnc_websocket, ftx_websocket
