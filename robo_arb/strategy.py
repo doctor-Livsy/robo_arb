@@ -1,17 +1,91 @@
+import asyncio
+import time
+import logger
 
 
-async def price_analyze(binance, ftx, diff):
+logger = logger.get_logger('[Trade Events]')
+
+
+async def price_analyze(bnc, ftx, diff, margin) -> None:
+    """
+    The function compares prices and, if necessary, sends a trade command.
+
+    :param bnc: Binance update
+    :param ftx: FTX update
+    :param diff: min price difference to arbitrage
+    :param margin: margin value for trade
+    :return: None
+    """
+    # we have 2 cases for arbitrage trade: 'Binance case' and 'FTX case'
+    # Binance case: bid on FTX is more
+    # FTX case: bid on Binance is more
+
     try:
-        if float(binance['a']) - ftx['data']['bid'] > diff:
+        # comparing prices and volumes for 'Binance case'
+        check, pnl = await check_conditions(ftx['data']['bid'],
+                                            ftx['data']['bidSize'],
+                                            float(bnc['a']),
+                                            float(bnc['A']),
+                                            diff, margin, 'BINANCE')
+        if check:  # commands to execute trade
             print('There is opportunity to arbitration.\n'
-                  '==Binance BUY===FTX SELL==')
+                  f'Estimated PnL: {pnl}')
+            await binance_execute('BUY', margin)
+            await ftx_execute('SELL', margin)
+            return
 
-        elif ftx['data']['ask'] - float(binance['b']) > diff:
+        # comparing prices and volumes for 'FTX case'
+        check, pnl = await check_conditions(float(bnc['b']),
+                                            float(bnc['B']),
+                                            ftx['data']['ask'],
+                                            ftx['data']['askSize'],
+                                            diff, margin, 'FTX')
+        if check:  # commands to execute trade
             print('There is opportunity to arbitration.\n'
-                  '==FTX BUY===Binance SELL==')
+                  f'Estimated PnL: {pnl}')
+            await ftx_execute('BUY', margin)
+            await binance_execute('SELL', margin)
+            return
 
-        else:
-            print(binance)
+        else:  # all conditions is False. Just print JSONs
+            print(bnc)
             print(ftx)
+
     except KeyError:
-        print('Observing start')
+        # because the first update contains headers
+        print('Starting observe')
+
+
+async def check_conditions(bid, bid_size, ask, ask_size, min_diff, margin, case) -> tuple:
+    """Checking prices and volumes for arbitrage"""
+
+    current_prices_difference = bid - ask
+
+    # comparing prices
+    if current_prices_difference > min_diff:
+        # comparing volume
+        if (bid * bid_size > margin) and (ask * ask_size > margin):
+            pnl = (margin / ask) * bid - margin
+            logger.info(f'\n\n{time.asctime()} -- Case: {case}\n'
+                        f'Estimated PnL: {pnl}')
+            return True, pnl
+        else:
+            return False, None
+    else:
+        return False, None
+
+
+async def binance_execute(action, margin) -> None:
+    """Execute trade command..."""
+
+    event = f'BINANCE {action}. Margin: {margin}'
+    print(event)
+    logger.info(event)
+
+
+async def ftx_execute(action, margin) -> None:
+    """Execute trade command..."""
+
+    event = f'FTX {action}.     Margin: {margin}'
+    print(event)
+    logger.info(event)
