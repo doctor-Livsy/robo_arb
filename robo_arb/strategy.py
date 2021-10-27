@@ -1,4 +1,3 @@
-import asyncio
 import time
 import logger
 
@@ -28,8 +27,6 @@ async def price_analyze(bnc, ftx, diff, margin) -> None:
                                             float(bnc['A']),
                                             diff, margin, 'BINANCE')
         if check:  # commands to execute trade
-            print('There is opportunity to arbitration.\n'
-                  f'Estimated PnL: {pnl}')
             await binance_execute('BUY', margin)
             await ftx_execute('SELL', margin)
             return
