@@ -41,8 +41,6 @@ async def price_analyze(bnc, ftx, diff, margin) -> None:
                                             ftx['data']['askSize'],
                                             diff, margin, 'FTX')
         if check:  # commands to execute trade
-            print('There is opportunity to arbitration.\n'
-                  f'Estimated PnL: {pnl}')
             await ftx_execute('BUY', margin)
             await binance_execute('SELL', margin)
             return
@@ -66,8 +64,9 @@ async def check_conditions(bid, bid_size, ask, ask_size, min_diff, margin, case)
         # comparing volume
         if (bid * bid_size > margin) and (ask * ask_size > margin):
             pnl = (margin / ask) * bid - margin
-            logger.info(f'\n\n{time.asctime()} -- Case: {case}\n'
-                        f'Estimated PnL: {pnl}')
+            event = f'\n{time.asctime()} -- Case: {case}\nEstimated PnL: {pnl}'
+            print(event)
+            logger.info(event)
             return True, pnl
         else:
             return False, None
