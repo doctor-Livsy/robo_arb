@@ -1,7 +1,6 @@
 import asyncio
 import configparser
 from exchanges_streaming import start_sockets, exchanges_message_handler
-import logging
 
 
 def load_settings() -> configparser.ConfigParser:
@@ -64,7 +63,5 @@ async def main(settings: configparser.ConfigParser) -> None:
 
 
 if __name__ == '__main__':
-
-
     loop = asyncio.get_event_loop()
     loop.run_until_complete(main(settings=load_settings()))

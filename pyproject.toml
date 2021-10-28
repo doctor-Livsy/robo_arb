@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "robo"
+name = "robo_arb"
 version = "0.1.0"
 description = ""
 authors = ["dr.Livsy <plumbus.rise@gmail.com>"]
