@@ -1,15 +1,23 @@
-FROM python:3.8.8-windowsservercore-1809
+FROM python:3.8.8-slim
 
-WORKDIR /usr/src/app
+ENV PYTHONUNBUFFERED=1 \
+    BINANCE_TICKER=BTCUSDT \
+    FTX_TICKER=BTC-PERP \
+    REFRESH_RATE=0.01 \
+    PRICE_DIFFERENCE=50 \
+    MARGIN=1000
 
-COPY poetry.lock pyproject.toml ./
+RUN mkdir -p /app/
 
 RUN python -m pip install --upgrade pip \
     && pip install poetry==1.1.11 \
-    && poetry config virtualenvs.create false \
-    && cd /usr/src/app \
-    && poetry install
+    && poetry config virtualenvs.create false
 
-COPY robo_arb/. ./robo_arb
+WORKDIR /app/
 
-CMD [ "python", "./robo_arb/app.py" ]
+COPY env.list pyproject.toml poetry.lock /app/
+RUN poetry install
+
+COPY ./robo_arb/ /app/
+
+CMD [ "python", "/app/app.py" ]

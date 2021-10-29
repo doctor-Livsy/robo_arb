@@ -1,18 +1,6 @@
 import asyncio
-import configparser
 from exchanges_streaming import start_sockets, exchanges_message_handler
-
-
-def load_settings() -> configparser.ConfigParser:
-    """
-    Function loads settings from settings.ini file.
-
-    :return: config: instance of ConfigParser
-    """
-
-    config = configparser.ConfigParser()
-    config.read('settings.ini')
-    return config
+import config
 
 
 async def exchanges_websocket_data(bnc_ticker: str, ftx_ticker: str) -> dict:
@@ -37,22 +25,21 @@ async def exchanges_websocket_data(bnc_ticker: str, ftx_ticker: str) -> dict:
     return websocket_data
 
 
-async def main(settings: configparser.ConfigParser) -> None:
+async def main() -> None:
     """
     Main function. After loading settings it run Websockets connection and
     subscribe to exchange updates.
     There is handling updates and executing strategy also.
 
-    :param settings: settings from settings.ini file
     :return: None
     """
 
     # extraction of settings
-    bnc_ticker = settings['ticker_parameters']['bnc_ticker']
-    ftx_ticker = settings['ticker_parameters']['ftx_ticker']
-    param = {'r_r': float(settings['system_parameters']['refresh_rate']),
-             'p_d': float(settings['system_parameters']['price_difference']),
-             'm': float(settings['system_parameters']['margin'])}
+    bnc_ticker = config.BINANCE_TICKER
+    ftx_ticker = config.FTX_TICKER
+    param = {'r_r': float(config.REFRESH_RATE),
+             'p_d': float(config.PRICE_DIFFERENCE),
+             'm': float(config.MARGIN)}
 
     # opening websockets and subscribing to update
     websocket_data = await exchanges_websocket_data(bnc_ticker, ftx_ticker)
@@ -64,4 +51,4 @@ async def main(settings: configparser.ConfigParser) -> None:
 
 if __name__ == '__main__':
     loop = asyncio.get_event_loop()
-    loop.run_until_complete(main(settings=load_settings()))
+    loop.run_until_complete(main())
