@@ -15,7 +15,7 @@ RUN python -m pip install --upgrade pip \
 
 WORKDIR /app/
 
-COPY env.list pyproject.toml poetry.lock /app/
+COPY param.list pyproject.toml poetry.lock /app/
 RUN poetry install
 
 COPY ./robo_arb/ /app/

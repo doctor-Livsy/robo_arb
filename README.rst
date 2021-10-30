@@ -7,7 +7,7 @@ subscribe on updates selected tickers and execute arbitration strategy.
 Now the robot terminated by restarting the terminal.
 
 Input parameters modify in 'env.list' file and selected in docker containers
-with command: "docker run --env-file ./env.list <name_robot_image>".
+with command: "docker run --env-file ./param.list <name_robot_image>".
 
 env.list contains 5 parameters:
 
